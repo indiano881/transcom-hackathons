@@ -1,0 +1,38 @@
+import type { UploadResponse, DeployRequest, DeployResponse, Deployment } from './types';
+
+const BASE = '/api';
+
+async function request<T>(url: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${BASE}${url}`, options);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(body.detail || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function uploadZip(file: File): Promise<UploadResponse> {
+  const form = new FormData();
+  form.append('file', file);
+  return request<UploadResponse>('/upload', { method: 'POST', body: form });
+}
+
+export async function deployProject(id: string, req: DeployRequest): Promise<DeployResponse> {
+  return request<DeployResponse>(`/deployments/${id}/deploy`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+}
+
+export async function listDeployments(): Promise<Deployment[]> {
+  return request<Deployment[]>('/deployments');
+}
+
+export async function getDeployment(id: string): Promise<Deployment> {
+  return request<Deployment>(`/deployments/${id}`);
+}
+
+export async function deleteDeployment(id: string): Promise<void> {
+  await request(`/deployments/${id}`, { method: 'DELETE' });
+}
