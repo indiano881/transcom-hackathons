@@ -36,22 +36,37 @@ cd terraform && terraform init -backend-config=bucket={project}-airlock-tf-state
 cd terraform && terraform apply -var=project_id=... -var=deployment_id=... -var=image_url=...
 ```
 
-No test suite exists yet.
+No test suite exists yet. Sample ZIPs for manual testing are in `sample-zips/`.
 
 ## Architecture
 
-Drag-and-drop ZIP deployment gateway: user uploads a ZIP of static HTML/CSS/JS, the backend runs concurrent AI checks (security, cost, brand), then containerizes with nginx and deploys to Cloud Run via Terraform.
+Drag-and-drop ZIP deployment gateway: user uploads a ZIP of static HTML/CSS/JS, the backend runs concurrent AI checks (security, cost, brand), then containerizes with nginx and deploys to Cloud Run via Terraform. Detailed diagrams in `ARCHITECTURE.md` and `FLOW.md`.
 
 **Frontend** (React 19 + Vite + TypeScript): State machine in `App.tsx` drives the UI through phases: `upload → checking → results → deploying → deployed`. API client in `api.ts` hits `/api/*` which Vite proxies to the backend (`vite.config.ts`).
 
 **Backend** (FastAPI + SQLite via aiosqlite):
-- `routers/upload.py` — Accepts ZIP, validates via `zip_handler.py` (50MB max, allowed extensions, requires `index.html`), runs 3 AI checks concurrently via `ai_analyzer.py`, stores results in SQLite
+- `routers/upload.py` — Accepts ZIP, validates via `zip_handler.py`, runs 3 AI checks concurrently via `ai_analyzer.py`, stores results in SQLite
 - `routers/deployments.py` — Deploy (blocked if `security_status='fail'`), list, get, teardown
 - `services/deployer.py` — Generates `Dockerfile` (nginx:alpine), runs `gcloud builds submit`, then `terraform apply` with a per-deployment workspace (`airlock-{id[:12]}`)
 - `services/cleanup.py` — Background loop (60s interval) tears down expired demo deployments
 - `prompts/` — System prompts for security, cost, and brand AI checks
 
+ZIP validation (`zip_handler.py`): 50MB upload / 100MB extracted limit, allowed extension whitelist, path traversal blocked, requires `index.html` (auto-promoted from one level deep if needed).
+
+AI checks use `claude-sonnet-4-5-20250929` with max 1024 tokens per check.
+
 **Terraform** (`terraform/modules/airlock-deployment/`): Cloud Run v2 service with scale-to-zero, public IAM access. One Terraform workspace per deployment, state in GCS.
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/upload` | POST | Accept ZIP (multipart), validate, run AI checks |
+| `/api/deployments` | GET | List all deployments |
+| `/api/deployments/{id}` | GET | Get single deployment |
+| `/api/deployments/{id}/deploy` | POST | Build container + deploy to Cloud Run |
+| `/api/deployments/{id}` | DELETE | Teardown infra + delete record |
+| `/api/health` | GET | Health check |
 
 ### Deployment Status Flow
 ```
