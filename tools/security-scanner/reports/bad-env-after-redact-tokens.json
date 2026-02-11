@@ -1,0 +1,164 @@
+{
+  "risk_level": "High",
+  "recommendation": "Deployment Blocked",
+  "rule_findings": [
+    {
+      "rule_id": "SEC001",
+      "category": "Secrets",
+      "severity": "High",
+      "file": ".env.local",
+      "line": 3,
+      "evidence": "OPENROUTER_API_KEY=\"DEMO_FAKE_KEY_FOR_SCANNER_1234567890\"",
+      "description": "Hard-coded API key or token-like secret.",
+      "source_engine": "local-regex"
+    },
+    {
+      "rule_id": "SEC002",
+      "category": "Unsafe Code Execution",
+      "severity": "High",
+      "file": "main.js",
+      "line": 4,
+      "evidence": "const value = eval(template);",
+      "description": "Potential arbitrary code execution sink.",
+      "source_engine": "local-regex"
+    },
+    {
+      "rule_id": "SEC003",
+      "category": "External Network Call",
+      "severity": "Medium",
+      "file": "main.js",
+      "line": 7,
+      "evidence": "axios.get(\"https://collector.example.invalid/events\").catch(() => {});",
+      "description": "Outbound network request detected (review trust boundaries).",
+      "source_engine": "local-regex"
+    }
+  ],
+  "ai_analysis": {
+    "ai_risk_level": "High",
+    "ai_summary": "Rule scan detected 3 finding(s). Top categories: Secrets (1), Unsafe Code Execution (1), External Network Call (1). Review data flow and exploitability to reduce false positives.",
+    "ai_additional_findings": [],
+    "ai_input_hint": "Use findings grouped by file and category to request exploitability and remediation prioritization."
+  },
+  "limitations": [
+    "Static analysis only",
+    "No runtime execution",
+    "Regex-based pattern matching may produce false positives/negatives",
+    "No full taint/data-flow tracking in this version"
+  ],
+  "metadata": {
+    "scanned_path": "/Users/qida0163/projects/hackathon_transcom/tools/security-scanner/example_websites/bad_env_site",
+    "files_scanned": 3,
+    "findings_count": 3,
+    "rules_count": 6,
+    "engines": {
+      "local_regex": {
+        "enabled": true,
+        "status": "ok",
+        "findings": 3,
+        "rules_count": 6
+      },
+      "semgrep": {
+        "enabled": false,
+        "status": "skipped",
+        "findings": 0
+      },
+      "gitleaks": {
+        "enabled": false,
+        "status": "skipped",
+        "findings": 0
+      }
+    },
+    "rules_source": "/Users/qida0163/projects/hackathon_transcom/tools/security-scanner/rules.json",
+    "ai_api": {
+      "called": false,
+      "provider": null,
+      "model": null,
+      "usage": null,
+      "credits": null,
+      "credits_error": null
+    }
+  },
+  "ai_gate": {
+    "enabled": false,
+    "mode": "Demo",
+    "policy_mode": "demo",
+    "policy_version": "v0.1",
+    "instruction_file": null,
+    "model": "openai/gpt-4o-mini",
+    "analysis_status": "skipped",
+    "analysis_error": null,
+    "tool_summary": {
+      "local_regex_findings": 3,
+      "semgrep_findings": 0,
+      "gitleaks_findings": 0,
+      "high_severity": 2,
+      "medium_severity": 1,
+      "low_severity": 0
+    },
+    "key_findings": [
+      {
+        "id": "KF-001",
+        "tool": "local-regex",
+        "source_engine": "local-regex",
+        "category": "Secrets",
+        "severity": "High",
+        "file": ".env.local",
+        "line": 3,
+        "evidence": "OPENROUTER_API_KEY=\"DEMO_FAKE_KEY_FOR_SCANNER_1234567890\"",
+        "explanation": "Hard-coded API key or token-like secret.",
+        "confidence": 0.75,
+        "tags": [],
+        "context_snippet": "      1: # Intentionally fake values for security scanner test cases.\n      2: # Do not use as real credentials.\n>>    3: OPENROUTER_API_KEY=\"DEMO_FAKE_KEY_FOR_SCANNER_1234567890\"\n      4: NEXT_PUBLIC_TOKEN=\"DEMO_PUBLIC_TOKEN_FOR_SCANNER_1234567890\""
+      },
+      {
+        "id": "KF-002",
+        "tool": "local-regex",
+        "source_engine": "local-regex",
+        "category": "Unsafe Code Execution",
+        "severity": "High",
+        "file": "main.js",
+        "line": 4,
+        "evidence": "const value = eval(template);",
+        "explanation": "Potential arbitrary code execution sink.",
+        "confidence": 0.75,
+        "tags": [],
+        "context_snippet": "      1: const template = new URLSearchParams(window.location.search).get(\"tpl\") || \"2 + 2\";\n      2: \n      3: // Intentional eval usage\n>>    4: const value = eval(template);\n      5: document.getElementById(\"out\").textContent = String(value);\n      6: \n      7: axios.get(\"https://collector.example.invalid/events\").catch(() => {});"
+      },
+      {
+        "id": "KF-003",
+        "tool": "local-regex",
+        "source_engine": "local-regex",
+        "category": "External Network Call",
+        "severity": "Medium",
+        "file": "main.js",
+        "line": 7,
+        "evidence": "axios.get(\"https://collector.example.invalid/events\").catch(() => {});",
+        "explanation": "Outbound network request detected (review trust boundaries).",
+        "confidence": 0.75,
+        "tags": [],
+        "context_snippet": "      1: const template = new URLSearchParams(window.location.search).get(\"tpl\") || \"2 + 2\";\n      2: \n      3: // Intentional eval usage\n      4: const value = eval(template);\n      5: document.getElementById(\"out\").textContent = String(value);\n      6: \n>>    7: axios.get(\"https://collector.example.invalid/events\").catch(() => {});"
+      }
+    ],
+    "input_redaction": {
+      "enabled": false,
+      "findings_considered": 0,
+      "findings_redacted": 0,
+      "replacement_count": 0
+    },
+    "fusion_decision": {
+      "risk_level": "High",
+      "recommendation": "Deployment Blocked",
+      "compat_recommendation": "Deployment Blocked",
+      "decision_path": [
+        "AI gate disabled; using rule-engine decision."
+      ],
+      "overrides_applied": []
+    },
+    "explanation_for_decision": "AI gate disabled.",
+    "mitigation_suggestions": [],
+    "confidence_and_limitations": [
+      "Static analysis only",
+      "AI gate disabled by default"
+    ]
+  }
+}

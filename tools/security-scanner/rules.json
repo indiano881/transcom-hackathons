@@ -1,0 +1,81 @@
+{
+  "version": "1.0",
+  "rules": [
+    {
+      "rule_id": "SEC001",
+      "category": "Secrets",
+      "severity": "High",
+      "description": "Hard-coded API key or token-like secret.",
+      "patterns": [
+        "(?i)(api[_-]?key|secret|access[_-]?token|private[_-]?key)\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-\\.\\=]{12,}['\\\"]",
+        "AKIA[0-9A-Z]{16}",
+        "(?i)ghp_[A-Za-z0-9]{36}",
+        "(?i)AIza[0-9A-Za-z\\-_]{35}"
+      ]
+    },
+    {
+      "rule_id": "SEC002",
+      "category": "Unsafe Code Execution",
+      "severity": "High",
+      "description": "Potential arbitrary code execution sink.",
+      "patterns": [
+        "\\beval\\s*\\(",
+        "\\bexec\\s*\\(",
+        "\\bos\\.system\\s*\\(",
+        "\\bsubprocess\\.(Popen|call|run|check_output|check_call)\\s*\\(",
+        "\\bRuntime\\.getRuntime\\(\\)\\.exec\\s*\\(",
+        "\\bchild_process\\.(exec|execSync|spawn|spawnSync)\\s*\\("
+      ]
+    },
+    {
+      "rule_id": "SEC003",
+      "category": "External Network Call",
+      "severity": "Medium",
+      "description": "Outbound network request detected (review trust boundaries).",
+      "patterns": [
+        "\\brequests\\.(get|post|put|delete|patch|request)\\s*\\(",
+        "\\bhttpx\\.(get|post|put|delete|patch|request)\\s*\\(",
+        "\\burllib\\.request\\.",
+        "\\bfetch\\s*\\(",
+        "\\baxios\\.(get|post|put|delete|patch|request)\\s*\\(",
+        "\\bXMLHttpRequest\\b",
+        "\\bnew\\s+WebSocket\\s*\\("
+      ]
+    },
+    {
+      "rule_id": "SEC004",
+      "category": "Potential Data Exposure",
+      "severity": "Medium",
+      "description": "Sensitive data may be logged or exposed.",
+      "patterns": [
+        "(?i)(print|console\\.log|logger\\.(info|debug|warning|error))\\s*\\(.*(password|token|secret|authorization|api[_-]?key)",
+        "(?i)DEBUG\\s*=\\s*True",
+        "(?i)app\\.run\\(.*debug\\s*=\\s*True",
+        "(?i)CORS\\(.*origins\\s*=\\s*['\\\"]\\*['\\\"]"
+      ]
+    },
+    {
+      "rule_id": "SEC005",
+      "category": "SQL Injection Risk",
+      "severity": "High",
+      "description": "String-formatted SQL query detected.",
+      "patterns": [
+        "(?i)(SELECT|INSERT|UPDATE|DELETE).*(%s|\\+\\s*\\w+|\\{\\w+\\})",
+        "(?i)cursor\\.execute\\s*\\(\\s*f['\\\"].*(SELECT|INSERT|UPDATE|DELETE)",
+        "(?i)executeQuery\\s*\\(\\s*['\\\"].*(SELECT|INSERT|UPDATE|DELETE).*\\+"
+      ]
+    },
+    {
+      "rule_id": "SEC006",
+      "category": "Insecure Deserialization",
+      "severity": "High",
+      "description": "Potentially unsafe deserialization usage.",
+      "patterns": [
+        "\\bpickle\\.loads\\s*\\(",
+        "\\byaml\\.load\\s*\\([^,)]*\\)",
+        "\\bObjectInputStream\\b",
+        "\\bunserialize\\s*\\("
+      ]
+    }
+  ]
+}
