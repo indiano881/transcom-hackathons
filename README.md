@@ -20,3 +20,16 @@ For convenience, the project root directory contains the following ZIP files for
 * `pure-html-website.zip`: Another website built with pure HTML, CSS, and JavaScript
 * `react-website.zip`: A website built with the latest version of [React](https://react.dev/), a popular front-end framework
 * `vue-website.zip`: A website built with the latest version of [Vue.js](https://vuejs.org/), another popular front-end framework
+
+---
+
+# Plugin Development
+
+Different plugins may use different programming languages or libraries. For example, some use the **Anthropic SDK**, while others may use the **OpenAI SDK**.
+
+The backend runs each plugin as a **separate process**, communicating via **standard input/output**.
+
+* Each plugin must be placed in a separate folder inside `hackathon_transcom/plugins`.
+* Two example plugins are already included in this folder.
+* New plugins must be added to the configuration file `backend/app/plugins.yml`.
+

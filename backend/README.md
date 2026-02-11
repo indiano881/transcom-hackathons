@@ -89,18 +89,6 @@ Using Python’s built-in PDB debugger in the terminal is not very convenient. W
 
 ---
 
-# Plugin Development
-
-Different plugins may use different programming languages or libraries. For example, some use the **Anthropic SDK**, while others may use the **OpenAI SDK**.
-
-The backend runs each plugin as a **separate process**, communicating via **standard input/output**.
-
-* Each plugin must be placed in a separate folder inside `hackathon_transcom/plugins`.
-* Two example plugins are already included in this folder.
-* New plugins must be added to the configuration file `backend/app/plugins.yml`.
-
----
-
 # Tech Stack
 
 * [Python 3.12](https://www.python.org/downloads/)
