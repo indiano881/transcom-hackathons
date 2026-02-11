@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { AppPhase, UploadResponse, Deployment } from './types';
-import { uploadZip, deployProject, listDeployments, deleteDeployment } from './api';
+import { uploadZip, deployProject, listDeployments, deleteDeployment, checkAuthStatus } from './api';
 import Header from './components/Header';
 import DropZone from './components/DropZone';
 import UploadProgress from './components/UploadProgress';
@@ -14,6 +14,7 @@ function App() {
   const [uploadResult, setUploadResult] = useState<UploadResponse | null>(null);
   const [deployments, setDeployments] = useState<Deployment[]>([]);
   const [deploying, setDeploying] = useState(false);
+  const [authState, setAuthState] = useState<{ authenticated: boolean; user?: { id: string; email: string; name: string; picture?: string } }>({ authenticated: false });
 
   const loadDeployments = useCallback(async () => {
     try {
@@ -29,6 +30,10 @@ function App() {
     const interval = setInterval(loadDeployments, 10000);
     return () => clearInterval(interval);
   }, [loadDeployments]);
+
+  useEffect(() => {
+    checkAuthStatus().then(setAuthState).catch(() => setAuthState({ authenticated: false }));
+  }, []);
 
   const handleFile = async (file: File) => {
     setError(null);
@@ -99,7 +104,7 @@ function App() {
 
   return (
     <>
-      <Header />
+      <Header authState={authState} onAuthChange={() => checkAuthStatus().then(setAuthState)} />
       <main className="main">
         {error && (
           <div className="error-banner">{error}</div>

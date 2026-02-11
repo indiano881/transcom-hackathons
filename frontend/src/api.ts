@@ -36,3 +36,17 @@ export async function getDeployment(id: string): Promise<Deployment> {
 export async function deleteDeployment(id: string): Promise<void> {
   await request(`/deployments/${id}`, { method: 'DELETE' });
 }
+
+// Auth API
+export async function checkAuthStatus(): Promise<{ authenticated: boolean; user?: { id: string; email: string; name: string; picture?: string } }> {
+  const res = await fetch(`${BASE}/auth/status`, { credentials: 'include' });
+  return res.json();
+}
+
+export async function logout(): Promise<void> {
+  await fetch(`${BASE}/auth/logout`, { credentials: 'include' });
+}
+
+export function login(): void {
+  window.location.href = `${BASE}/auth/login`;
+}
