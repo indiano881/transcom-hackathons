@@ -7,6 +7,7 @@ import UploadProgress from './components/UploadProgress';
 import CheckResults from './components/CheckResults';
 import DeployButton from './components/DeployButton';
 import DeploymentList from './components/DeploymentList';
+import FunDeploymentStatus from './components/FunDeploymentStatus';
 
 function App() {
   const [phase, setPhase] = useState<AppPhase>('upload');
@@ -125,16 +126,23 @@ function App() {
               cost={uploadResult.cost}
               brand={uploadResult.brand}
             />
-            <DeployButton
-              securityStatus={uploadResult.security.status}
-              deploying={deploying}
-              onDeploy={handleDeploy}
-            />
-            <div className="new-upload">
-              <button className="btn btn-secondary btn-sm" onClick={reset}>
-                Upload another
-              </button>
-            </div>
+
+            {deploying ? (
+              <FunDeploymentStatus />
+            ) : (
+              <>
+                <DeployButton
+                  securityStatus={uploadResult.security.status}
+                  deploying={deploying}
+                  onDeploy={handleDeploy}
+                />
+                <div className="new-upload">
+                  <button className="btn btn-secondary btn-sm" onClick={reset}>
+                    Upload another
+                  </button>
+                </div>
+              </>
+            )}
           </>
         )}
 
