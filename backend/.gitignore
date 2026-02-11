@@ -1,0 +1,4 @@
+.venv/
+airlock.db
+
+plugin-working-directory

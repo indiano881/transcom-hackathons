@@ -1,0 +1,8 @@
+
+{
+  "name": "Svenska Lär - Swedish Learning Hub",
+  "description": "A minimalist Swedish language learning platform featuring a daily word card, an advanced linguistic translator, and an AI-powered conversational tutor, all wrapped in a sleek Nordic design.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

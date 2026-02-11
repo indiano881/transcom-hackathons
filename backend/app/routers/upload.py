@@ -13,6 +13,8 @@ from ..models import UploadResponse
 from ..services.zip_handler import validate_and_extract, ZipValidationError
 from ..services.ai_analyzer import run_all_checks
 
+from app.plugin_runner import run_plugins
+
 router = APIRouter()
 
 
@@ -42,6 +44,8 @@ async def upload_zip(file: UploadFile = File(...)):
     finally:
         tmp_path.unlink(missing_ok=True)
 
+    # Run Plugin Checks
+    run_plugins(deploy_dir)
     # Run AI checks concurrently
     checks = await run_all_checks(deploy_dir)
 
