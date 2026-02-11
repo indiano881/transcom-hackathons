@@ -24,10 +24,36 @@ CREATE TABLE IF NOT EXISTS deployments (
 );
 """
 
+USER_SCHEMA = """
+CREATE TABLE IF NOT EXISTS user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    created_at TEXT NOT NULL
+)
+"""
+
+APP_SCHEMA = """
+CREATE TABLE IF NOT EXISTS app (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    original_name TEXT NOT NULL,
+    stored_name TEXT NOT NULL,
+    file_size INTEGER NOT NULL,
+    uploaded_at TEXT NOT NULL,
+    status TEXT NOT NULL,
+    site_url TEXT,
+    FOREIGN KEY(user_id) REFERENCES user(id)
+)
+"""
+
 
 async def init_db():
     async with aiosqlite.connect(DB_PATH) as db:
         await db.executescript(SCHEMA)
+        await db.executescript(USER_SCHEMA)
+        await db.executescript(APP_SCHEMA)
         await db.commit()
 
 

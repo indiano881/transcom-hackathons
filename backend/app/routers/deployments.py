@@ -1,3 +1,4 @@
+import logging
 import json
 import shutil
 from datetime import datetime, timezone, timedelta
@@ -9,6 +10,7 @@ from ..database import execute, fetch_one, fetch_all
 from ..models import Deployment, DeployRequest, DeployResponse
 from ..services.deployer import build_and_push, terraform_apply, terraform_destroy
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -34,6 +36,7 @@ async def get_deployment(deployment_id: str):
 
 @router.post("/deployments/{deployment_id}/deploy", response_model=DeployResponse)
 async def deploy(deployment_id: str, req: DeployRequest):
+    logger.info('deployment_id = %s', deployment_id)
     row = await fetch_one("SELECT * FROM deployments WHERE id = ?", (deployment_id,))
     if not row:
         raise HTTPException(status_code=404, detail="Deployment not found")
@@ -52,6 +55,7 @@ async def deploy(deployment_id: str, req: DeployRequest):
         raise HTTPException(status_code=400, detail="Mode must be 'demo' or 'prod'")
 
     deploy_dir = settings.deployments_dir / deployment_id
+    logger.info('deploy_dir = %s', deploy_dir)
     if not deploy_dir.exists():
         raise HTTPException(status_code=404, detail="Deployment files not found")
 
@@ -62,16 +66,20 @@ async def deploy(deployment_id: str, req: DeployRequest):
     )
 
     try:
-        # Build and push image
-        image_url = await build_and_push(deployment_id, deploy_dir)
+        if settings.enable_deploy:
+            # Build and push image
+            image_url = await build_and_push(deployment_id, deploy_dir)
 
-        # Terraform apply
-        cloud_run_url = await terraform_apply(
-            deployment_id=deployment_id,
-            image_url=image_url,
-            mode=req.mode,
-            security_status=row["security_status"] or "unknown",
-        )
+            # Terraform apply
+            cloud_run_url = await terraform_apply(
+                deployment_id=deployment_id,
+                image_url=image_url,
+                mode=req.mode,
+                security_status=row["security_status"] or "unknown",
+            )
+        else:
+            logger.warning(f"settings.enable_deploy is {settings.enable_deploy}, shouldn't deploy it")
+            cloud_run_url = 'fake url'
     except Exception as e:
         await execute(
             "UPDATE deployments SET status = 'failed' WHERE id = ?",

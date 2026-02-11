@@ -25,10 +25,17 @@ class Settings(BaseSettings):
     tf_state_bucket: str = ""
     base_dir: Path = Path(__file__).resolve().parent.parent
     deployments_dir: Path = Path(__file__).resolve().parent.parent / "deployments"
+    plugin_working_directory: Path = Path(__file__).resolve().parent.parent / "plugin-working-directory"
     terraform_dir: Path = Path(__file__).resolve().parent.parent.parent / "terraform"
     db_path: Path = Path(__file__).resolve().parent.parent / "airlock.db"
     demo_ttl_seconds: int = 3600  # 1 hour
     cleanup_interval_seconds: int = 60
+
+    jwt_secret_key: str = "0e23078e3ad17442ff9fecbf20f41a4f"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 60
+
+    enable_deploy: bool = False
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
