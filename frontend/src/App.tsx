@@ -14,8 +14,8 @@ function App() {
   const [uploadResult, setUploadResult] = useState<UploadResponse | null>(null);
   const [deployments, setDeployments] = useState<Deployment[]>([]);
   const [deploying, setDeploying] = useState(false);
-  const [partnerMode, setPartnerMode] = useState(false);
   const [partnerUrl, setPartnerUrl] = useState('');
+  const [savedPartnerUrl, setSavedPartnerUrl] = useState('');
 
   const loadDeployments = useCallback(async () => {
     try {
@@ -36,7 +36,7 @@ function App() {
     setError(null);
     setPhase('checking');
     try {
-      const result = await uploadZip(file, partnerMode && partnerUrl ? partnerUrl : undefined);
+      const result = await uploadZip(file, savedPartnerUrl || undefined);
       setUploadResult(result);
       setPhase('results');
       loadDeployments();
@@ -79,8 +79,8 @@ function App() {
     setPhase('upload');
     setUploadResult(null);
     setError(null);
-    setPartnerMode(false);
     setPartnerUrl('');
+    setSavedPartnerUrl('');
   };
 
   const checkingSteps = [
@@ -96,8 +96,8 @@ function App() {
     },
     {
       label: 'Brand Validation',
-      sublabel: partnerMode && partnerUrl
-        ? `Checking brand alignment with ${(() => { try { return new URL(partnerUrl).hostname; } catch { return partnerUrl; } })()}`
+      sublabel: savedPartnerUrl
+        ? `Checking brand alignment with ${(() => { try { return new URL(savedPartnerUrl).hostname; } catch { return savedPartnerUrl; } })()}`
         : 'Checking Transcom brand alignment',
       state: phase === 'checking' ? 'active' as const : 'done' as const,
     },
@@ -115,22 +115,36 @@ function App() {
           <>
             <DropZone onFile={handleFile} />
             <div className="partner-option">
-              <label className="partner-toggle">
-                <input
-                  type="checkbox"
-                  checked={partnerMode}
-                  onChange={(e) => setPartnerMode(e.target.checked)}
-                />
-                Check against a partner company's brand
-              </label>
-              {partnerMode && (
-                <input
-                  type="url"
-                  className="partner-input"
-                  placeholder="https://www.pinterest.com"
-                  value={partnerUrl}
-                  onChange={(e) => setPartnerUrl(e.target.value)}
-                />
+              <p className="partner-helper">
+                Brand check defaults to Transcom. Add a partner URL to check against their brand instead.
+              </p>
+              {savedPartnerUrl ? (
+                <div className="partner-saved">
+                  <span className="partner-saved-url">{savedPartnerUrl}</span>
+                  <button
+                    className="partner-saved-remove"
+                    onClick={() => { setSavedPartnerUrl(''); setPartnerUrl(''); }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="partner-url-row">
+                  <input
+                    type="url"
+                    className="partner-input"
+                    placeholder="https://www.pinterest.com"
+                    value={partnerUrl}
+                    onChange={(e) => setPartnerUrl(e.target.value)}
+                  />
+                  <button
+                    className="btn btn-sm btn-demo"
+                    disabled={!partnerUrl}
+                    onClick={() => setSavedPartnerUrl(partnerUrl)}
+                  >
+                    Save
+                  </button>
+                </div>
               )}
             </div>
           </>
