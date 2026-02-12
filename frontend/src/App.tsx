@@ -14,6 +14,8 @@ function App() {
   const [uploadResult, setUploadResult] = useState<UploadResponse | null>(null);
   const [deployments, setDeployments] = useState<Deployment[]>([]);
   const [deploying, setDeploying] = useState(false);
+  const [partnerMode, setPartnerMode] = useState(false);
+  const [partnerUrl, setPartnerUrl] = useState('');
 
   const loadDeployments = useCallback(async () => {
     try {
@@ -34,7 +36,7 @@ function App() {
     setError(null);
     setPhase('checking');
     try {
-      const result = await uploadZip(file);
+      const result = await uploadZip(file, partnerMode && partnerUrl ? partnerUrl : undefined);
       setUploadResult(result);
       setPhase('results');
       loadDeployments();
@@ -77,6 +79,8 @@ function App() {
     setPhase('upload');
     setUploadResult(null);
     setError(null);
+    setPartnerMode(false);
+    setPartnerUrl('');
   };
 
   const checkingSteps = [
@@ -92,7 +96,9 @@ function App() {
     },
     {
       label: 'Brand Validation',
-      sublabel: 'Checking Transcom brand alignment',
+      sublabel: partnerMode && partnerUrl
+        ? `Checking brand alignment with ${(() => { try { return new URL(partnerUrl).hostname; } catch { return partnerUrl; } })()}`
+        : 'Checking Transcom brand alignment',
       state: phase === 'checking' ? 'active' as const : 'done' as const,
     },
   ];
@@ -106,7 +112,28 @@ function App() {
         )}
 
         {phase === 'upload' && (
-          <DropZone onFile={handleFile} />
+          <>
+            <DropZone onFile={handleFile} />
+            <div className="partner-option">
+              <label className="partner-toggle">
+                <input
+                  type="checkbox"
+                  checked={partnerMode}
+                  onChange={(e) => setPartnerMode(e.target.checked)}
+                />
+                Check against a partner company's brand
+              </label>
+              {partnerMode && (
+                <input
+                  type="url"
+                  className="partner-input"
+                  placeholder="https://www.pinterest.com"
+                  value={partnerUrl}
+                  onChange={(e) => setPartnerUrl(e.target.value)}
+                />
+              )}
+            </div>
+          </>
         )}
 
         {phase === 'checking' && (

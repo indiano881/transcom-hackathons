@@ -1,15 +1,18 @@
+from __future__ import annotations
+
 import asyncio
 import json
 import logging
 from pathlib import Path
 
 import anthropic
+import httpx
 
 from ..config import settings
 from ..models import CheckResult
 from ..prompts.security import SECURITY_PROMPT
 from ..prompts.cost import COST_PROMPT
-from ..prompts.brand import BRAND_PROMPT
+from ..prompts.brand import build_brand_prompt
 from .zip_handler import get_text_files, get_file_metadata
 
 logger = logging.getLogger(__name__)
@@ -71,12 +74,27 @@ async def run_cost_check(deploy_dir: Path) -> CheckResult:
         return _warn_result(str(e))
 
 
-async def run_brand_check(deploy_dir: Path) -> CheckResult:
+async def _fetch_partner_html(url: str) -> str | None:
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=15.0) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+            return resp.text
+    except Exception:
+        logger.warning("Failed to fetch partner page: %s", url)
+        return None
+
+
+async def run_brand_check(
+    deploy_dir: Path,
+    partner_url: str | None = None,
+    partner_html: str | None = None,
+) -> CheckResult:
     try:
         files = get_text_files(deploy_dir)
         if not files:
             return CheckResult(status="pass", summary="No text files to analyze", details=[])
-        prompt = BRAND_PROMPT + _format_files_for_prompt(files)
+        prompt = build_brand_prompt(partner_url, partner_html) + _format_files_for_prompt(files)
         result = await _call_claude(prompt)
         return CheckResult(**result)
     except Exception as e:
@@ -84,10 +102,15 @@ async def run_brand_check(deploy_dir: Path) -> CheckResult:
         return _warn_result(str(e))
 
 
-async def run_all_checks(deploy_dir: Path) -> dict:
+async def run_all_checks(deploy_dir: Path, partner_url: str | None = None) -> dict:
+    # Fetch partner HTML before running concurrent checks
+    partner_html = None
+    if partner_url:
+        partner_html = await _fetch_partner_html(partner_url)
+
     security, cost, brand = await asyncio.gather(
         run_security_check(deploy_dir),
         run_cost_check(deploy_dir),
-        run_brand_check(deploy_dir),
+        run_brand_check(deploy_dir, partner_url=partner_url, partner_html=partner_html),
     )
     return {"security": security, "cost": cost, "brand": brand}

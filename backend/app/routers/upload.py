@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import json
 import uuid
 import tempfile
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 
 from ..config import settings
 from ..database import execute
@@ -17,7 +20,10 @@ router = APIRouter()
 
 
 @router.post("/upload", response_model=UploadResponse)
-async def upload_zip(file: UploadFile = File(...)):
+async def upload_zip(
+    file: UploadFile = File(...),
+    partner_url: Optional[str] = Form(None),
+):
     if not file.filename or not file.filename.lower().endswith(".zip"):
         raise HTTPException(status_code=400, detail="File must be a .zip archive")
 
@@ -43,7 +49,7 @@ async def upload_zip(file: UploadFile = File(...)):
         tmp_path.unlink(missing_ok=True)
 
     # Run AI checks concurrently
-    checks = await run_all_checks(deploy_dir)
+    checks = await run_all_checks(deploy_dir, partner_url=partner_url)
 
     now = datetime.now(timezone.utc).isoformat()
 
@@ -54,8 +60,8 @@ async def upload_zip(file: UploadFile = File(...)):
             security_status, security_details,
             cost_status, cost_details,
             brand_status, brand_details,
-            created_at)
-           VALUES (?, ?, 'checked', ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            partner_url, created_at)
+           VALUES (?, ?, 'checked', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             deployment_id,
             name,
@@ -67,6 +73,7 @@ async def upload_zip(file: UploadFile = File(...)):
             json.dumps({"summary": checks["cost"].summary, "details": checks["cost"].details}),
             checks["brand"].status,
             json.dumps({"summary": checks["brand"].summary, "details": checks["brand"].details}),
+            partner_url,
             now,
         ),
     )

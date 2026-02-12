@@ -11,9 +11,12 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   return res.json();
 }
 
-export async function uploadZip(file: File): Promise<UploadResponse> {
+export async function uploadZip(file: File, partnerUrl?: string): Promise<UploadResponse> {
   const form = new FormData();
   form.append('file', file);
+  if (partnerUrl) {
+    form.append('partner_url', partnerUrl);
+  }
   return request<UploadResponse>('/upload', { method: 'POST', body: form });
 }
 

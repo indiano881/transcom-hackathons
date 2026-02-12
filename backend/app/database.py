@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS deployments (
     brand_status TEXT,
     brand_details TEXT,
     cloud_run_url TEXT,
+    partner_url TEXT,
     created_at TEXT NOT NULL,
     deployed_at TEXT,
     expires_at TEXT
@@ -28,6 +29,11 @@ CREATE TABLE IF NOT EXISTS deployments (
 async def init_db():
     async with aiosqlite.connect(DB_PATH) as db:
         await db.executescript(SCHEMA)
+        # Migration for existing databases
+        try:
+            await db.execute("ALTER TABLE deployments ADD COLUMN partner_url TEXT")
+        except Exception:
+            pass  # Column already exists
         await db.commit()
 
 

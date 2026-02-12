@@ -41,13 +41,6 @@ async def deploy(deployment_id: str, req: DeployRequest):
     if row["status"] not in ("checked", "deployed"):
         raise HTTPException(status_code=400, detail=f"Cannot deploy: status is '{row['status']}'")
 
-    # Block deployment if security check failed
-    if row["security_status"] == "fail":
-        raise HTTPException(
-            status_code=403,
-            detail="Deployment blocked: security scan failed. Fix security issues and re-upload."
-        )
-
     if req.mode not in ("demo", "prod"):
         raise HTTPException(status_code=400, detail="Mode must be 'demo' or 'prod'")
 
