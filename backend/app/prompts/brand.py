@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import re
+
+
 BRAND_PROMPT = """You are Transcom's brand compliance advisor. Review the following HTML/CSS/JS files for alignment with Transcom's visual identity.
 
 Transcom Brand Guidelines:
@@ -60,10 +63,22 @@ FILES TO ANALYZE:
 """
 
 
+def _strip_html_noise(html: str) -> str:
+    """Remove script, style, svg, and noscript blocks to reduce token count."""
+    html = re.sub(r'<script[\s\S]*?</script>', '', html, flags=re.IGNORECASE)
+    html = re.sub(r'<style[\s\S]*?</style>', '', html, flags=re.IGNORECASE)
+    html = re.sub(r'<svg[\s\S]*?</svg>', '', html, flags=re.IGNORECASE)
+    html = re.sub(r'<noscript[\s\S]*?</noscript>', '', html, flags=re.IGNORECASE)
+    # Collapse whitespace
+    html = re.sub(r'\s{2,}', ' ', html)
+    return html.strip()
+
+
 def build_brand_prompt(partner_url: str | None = None, partner_html: str | None = None) -> str:
     if partner_url and partner_html:
-        # Truncate HTML to ~50KB to stay within token budget
-        truncated = partner_html[:50000]
+        cleaned = _strip_html_noise(partner_html)
+        # Truncate to ~15KB to stay within token budget
+        truncated = cleaned[:15000]
         return PARTNER_BRAND_PROMPT.format(
             partner_url=partner_url,
             partner_html=truncated,
