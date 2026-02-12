@@ -1,6 +1,24 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 
+class ApiErrorResponse(BaseModel):
+    code: str
+    message: str
+
+class RegisterRequest(BaseModel):
+    username: str = Field(..., min_length=3,max_length=20)
+    email: EmailStr = Field(..., max_length=255)
+    password: str = Field(..., min_length=5,max_length=50)
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
 
 class CheckResult(BaseModel):
     status: str  # pass, warn, fail

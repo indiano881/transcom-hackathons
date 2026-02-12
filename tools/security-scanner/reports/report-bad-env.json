@@ -1,0 +1,399 @@
+{
+  "risk_level": "High",
+  "recommendation": "Deployment Blocked",
+  "rule_findings": [
+    {
+      "rule_id": "SEC001",
+      "category": "Secrets",
+      "severity": "High",
+      "file": ".env.local",
+      "line": 1,
+      "evidence": "OPENROUTER_API_KEY=\"sk_test_abcdefghijklmnopqrstuvwxyz123456\"",
+      "description": "Hard-coded API key or token-like secret.",
+      "source_engine": "local-regex"
+    },
+    {
+      "rule_id": "SEC002",
+      "category": "Unsafe Code Execution",
+      "severity": "High",
+      "file": "main.js",
+      "line": 4,
+      "evidence": "const value = eval(template);",
+      "description": "Potential arbitrary code execution sink.",
+      "source_engine": "local-regex"
+    },
+    {
+      "rule_id": "SEC003",
+      "category": "External Network Call",
+      "severity": "Medium",
+      "file": "main.js",
+      "line": 7,
+      "evidence": "axios.get(\"https://collector.example.invalid/events\").catch(() => {});",
+      "description": "Outbound network request detected (review trust boundaries).",
+      "source_engine": "local-regex"
+    },
+    {
+      "rule_id": "SEMGREP:html.security.audit.missing-integrity.missing-integrity",
+      "category": "Semgrep",
+      "severity": "Medium",
+      "file": "index.html",
+      "line": 7,
+      "evidence": "requires login",
+      "description": "This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you\u2019re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "source_engine": "semgrep",
+      "external_rule_id": "html.security.audit.missing-integrity.missing-integrity"
+    },
+    {
+      "rule_id": "SEMGREP:javascript.browser.security.eval-detected.eval-detected",
+      "category": "Semgrep",
+      "severity": "Medium",
+      "file": "main.js",
+      "line": 4,
+      "evidence": "requires login",
+      "description": "Detected the use of eval(). eval() can be dangerous if used to evaluate dynamic content. If this content can be input from outside the program, this may be a code injection vulnerability. Ensure evaluated content is not definable by external sources.",
+      "source_engine": "semgrep",
+      "external_rule_id": "javascript.browser.security.eval-detected.eval-detected"
+    },
+    {
+      "rule_id": "SEMGREP:javascript.lang.security.detect-eval-with-expression.detect-eval-with-expression",
+      "category": "Semgrep",
+      "severity": "Medium",
+      "file": "main.js",
+      "line": 4,
+      "evidence": "requires login",
+      "description": "Detected use of dynamic execution of JavaScript which may come from user-input, which can lead to Cross-Site-Scripting (XSS). Where possible avoid including user-input in functions which dynamically execute user-input.",
+      "source_engine": "semgrep",
+      "external_rule_id": "javascript.lang.security.detect-eval-with-expression.detect-eval-with-expression"
+    }
+  ],
+  "ai_analysis": {
+    "ai_risk_level": "High",
+    "ai_summary": "The analysis identified hard-coded secrets and dangerous code execution patterns, both classified as high-risk issues.",
+    "ai_additional_findings": [
+      {
+        "tool": "local-regex",
+        "category": "Secrets",
+        "severity": "High",
+        "file": ".env.local",
+        "line": 1,
+        "explanation": "Hard-coded API key or token-like secret."
+      },
+      {
+        "tool": "local-regex",
+        "category": "Unsafe Code Execution",
+        "severity": "High",
+        "file": "main.js",
+        "line": 4,
+        "explanation": "Potential arbitrary code execution sink."
+      },
+      {
+        "tool": "semgrep",
+        "category": "Semgrep",
+        "severity": "Medium",
+        "file": "index.html",
+        "line": 7,
+        "explanation": "Missing 'integrity' attribute on external script."
+      },
+      {
+        "tool": "semgrep",
+        "category": "Semgrep",
+        "severity": "Medium",
+        "file": "main.js",
+        "line": 4,
+        "explanation": "Detected use of eval() which can be dangerous."
+      },
+      {
+        "tool": "semgrep",
+        "category": "Semgrep",
+        "severity": "Medium",
+        "file": "main.js",
+        "line": 4,
+        "explanation": "Dynamic execution of JavaScript may lead to XSS."
+      },
+      {
+        "tool": "local-regex",
+        "category": "External Network Call",
+        "severity": "Medium",
+        "file": "main.js",
+        "line": 7,
+        "explanation": "Outbound network request detected."
+      }
+    ]
+  },
+  "limitations": [
+    "Static analysis only",
+    "No runtime execution",
+    "Regex-based pattern matching may produce false positives/negatives",
+    "No full taint/data-flow tracking in this version"
+  ],
+  "metadata": {
+    "scanned_path": "/Users/qida0163/projects/hackathon_transcom/tools/security-scanner/example_websites/bad_env_site",
+    "files_scanned": 3,
+    "findings_count": 6,
+    "rules_count": 6,
+    "engines": {
+      "local_regex": {
+        "enabled": true,
+        "status": "ok",
+        "findings": 3,
+        "rules_count": 6
+      },
+      "semgrep": {
+        "enabled": true,
+        "binary": "semgrep",
+        "status": "ok",
+        "configs": [
+          "auto"
+        ],
+        "findings": 3,
+        "return_code": 0
+      },
+      "gitleaks": {
+        "enabled": true,
+        "binary": "gitleaks",
+        "status": "ok",
+        "findings": 0,
+        "return_code": 0
+      }
+    },
+    "rules_source": "/Users/qida0163/projects/hackathon_transcom/tools/security-scanner/rules.json",
+    "ai_api": {
+      "called": true,
+      "provider": "openrouter",
+      "model": "openai/gpt-4o-mini",
+      "usage": {
+        "cost": 0.0,
+        "prompt_tokens": 2565,
+        "completion_tokens": 515,
+        "total_tokens": 3080
+      },
+      "credits": {
+        "total_credits": 510.0,
+        "total_usage": 4.819827175,
+        "remaining": 505.180172825
+      },
+      "credits_error": null
+    }
+  },
+  "ai_gate": {
+    "enabled": true,
+    "mode": "Demo",
+    "policy_mode": "demo",
+    "policy_version": "v0.1",
+    "instruction_file": "/Users/qida0163/projects/hackathon_transcom/tools/security-scanner/instructions/Security_Gate_Demo_Mode.md",
+    "model": "openai/gpt-4o-mini",
+    "analysis_status": "ok",
+    "analysis_error": null,
+    "tool_summary": {
+      "local_regex_findings": 3,
+      "semgrep_findings": 3,
+      "gitleaks_findings": 0,
+      "high_severity": 2,
+      "medium_severity": 4,
+      "low_severity": 0
+    },
+    "key_findings": [
+      {
+        "id": "KF-001",
+        "tool": "local-regex",
+        "source_engine": "local-regex",
+        "category": "Secrets",
+        "severity": "High",
+        "file": ".env.local",
+        "line": 1,
+        "evidence": "OPENROUTER_API_KEY=\"sk_test_abcdefghijklmnopqrstuvwxyz123456\"",
+        "explanation": "Hard-coded API key or token-like secret.",
+        "confidence": 0.75,
+        "tags": []
+      },
+      {
+        "id": "KF-002",
+        "tool": "local-regex",
+        "source_engine": "local-regex",
+        "category": "Unsafe Code Execution",
+        "severity": "High",
+        "file": "main.js",
+        "line": 4,
+        "evidence": "const value = eval(template);",
+        "explanation": "Potential arbitrary code execution sink.",
+        "confidence": 0.75,
+        "tags": []
+      },
+      {
+        "id": "KF-003",
+        "tool": "semgrep",
+        "source_engine": "semgrep",
+        "category": "Semgrep",
+        "severity": "Medium",
+        "file": "index.html",
+        "line": 7,
+        "evidence": "requires login",
+        "explanation": "This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you\u2019re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+        "confidence": 0.75,
+        "tags": []
+      },
+      {
+        "id": "KF-004",
+        "tool": "semgrep",
+        "source_engine": "semgrep",
+        "category": "Semgrep",
+        "severity": "Medium",
+        "file": "main.js",
+        "line": 4,
+        "evidence": "requires login",
+        "explanation": "Detected the use of eval(). eval() can be dangerous if used to evaluate dynamic content. If this content can be input from outside the program, this may be a code injection vulnerability. Ensure evaluated content is not definable by external sources.",
+        "confidence": 0.75,
+        "tags": []
+      },
+      {
+        "id": "KF-005",
+        "tool": "semgrep",
+        "source_engine": "semgrep",
+        "category": "Semgrep",
+        "severity": "Medium",
+        "file": "main.js",
+        "line": 4,
+        "evidence": "requires login",
+        "explanation": "Detected use of dynamic execution of JavaScript which may come from user-input, which can lead to Cross-Site-Scripting (XSS). Where possible avoid including user-input in functions which dynamically execute user-input.",
+        "confidence": 0.75,
+        "tags": []
+      },
+      {
+        "id": "KF-006",
+        "tool": "local-regex",
+        "source_engine": "local-regex",
+        "category": "External Network Call",
+        "severity": "Medium",
+        "file": "main.js",
+        "line": 7,
+        "evidence": "axios.get(\"https://collector.example.invalid/events\").catch(() => {});",
+        "explanation": "Outbound network request detected (review trust boundaries).",
+        "confidence": 0.75,
+        "tags": []
+      },
+      {
+        "id": "AI-001",
+        "tool": "ai",
+        "source_engine": "ai",
+        "category": "Secrets",
+        "severity": "High",
+        "file": ".env.local",
+        "line": 1,
+        "evidence": "",
+        "explanation": "Hard-coded API key or token-like secret.",
+        "confidence": 0.6,
+        "tags": []
+      },
+      {
+        "id": "AI-002",
+        "tool": "ai",
+        "source_engine": "ai",
+        "category": "Unsafe Code Execution",
+        "severity": "High",
+        "file": "main.js",
+        "line": 4,
+        "evidence": "",
+        "explanation": "Potential arbitrary code execution sink.",
+        "confidence": 0.6,
+        "tags": []
+      },
+      {
+        "id": "AI-003",
+        "tool": "ai",
+        "source_engine": "ai",
+        "category": "Semgrep",
+        "severity": "Medium",
+        "file": "index.html",
+        "line": 7,
+        "evidence": "",
+        "explanation": "Missing 'integrity' attribute on external script.",
+        "confidence": 0.6,
+        "tags": []
+      },
+      {
+        "id": "AI-004",
+        "tool": "ai",
+        "source_engine": "ai",
+        "category": "Semgrep",
+        "severity": "Medium",
+        "file": "main.js",
+        "line": 4,
+        "evidence": "",
+        "explanation": "Detected use of eval() which can be dangerous.",
+        "confidence": 0.6,
+        "tags": []
+      },
+      {
+        "id": "AI-005",
+        "tool": "ai",
+        "source_engine": "ai",
+        "category": "Semgrep",
+        "severity": "Medium",
+        "file": "main.js",
+        "line": 4,
+        "evidence": "",
+        "explanation": "Dynamic execution of JavaScript may lead to XSS.",
+        "confidence": 0.6,
+        "tags": []
+      },
+      {
+        "id": "AI-006",
+        "tool": "ai",
+        "source_engine": "ai",
+        "category": "External Network Call",
+        "severity": "Medium",
+        "file": "main.js",
+        "line": 7,
+        "evidence": "",
+        "explanation": "Outbound network request detected.",
+        "confidence": 0.6,
+        "tags": []
+      }
+    ],
+    "fusion_decision": {
+      "risk_level": "High",
+      "recommendation": "Deployment Blocked",
+      "compat_recommendation": "Deployment Blocked",
+      "decision_path": [
+        "Detected secrets/credentials -> override to High."
+      ],
+      "overrides_applied": [
+        "SECRETS_ALWAYS_HIGH"
+      ]
+    },
+    "explanation_for_decision": "The presence of hard-coded secrets and dangerous code execution patterns necessitates blocking the deployment due to the high-risk nature of these findings.",
+    "mitigation_suggestions": [
+      "Remove hard-coded secrets and use environment variables instead.",
+      "Avoid using eval() and similar functions to prevent arbitrary code execution.",
+      "Implement subresource integrity (SRI) for external scripts.",
+      "Review and validate external network calls to ensure they are secure."
+    ],
+    "confidence_and_limitations": [
+      "Static analysis only",
+      "Demo environment assumptions applied"
+    ],
+    "input_redaction": {
+      "enabled": true,
+      "findings_considered": 6,
+      "findings_redacted": 0,
+      "replacement_count": 0,
+      "context_lines": 8,
+      "context_attached": 6
+    },
+    "api_observability": {
+      "called": true,
+      "usage": {
+        "cost": 0.0,
+        "prompt_tokens": 2565,
+        "completion_tokens": 515,
+        "total_tokens": 3080
+      },
+      "credits": {
+        "total_credits": 510.0,
+        "total_usage": 4.819827175,
+        "remaining": 505.180172825
+      },
+      "credits_error": null
+    }
+  }
+}

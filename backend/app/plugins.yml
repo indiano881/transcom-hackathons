@@ -1,0 +1,7 @@
+plugins:
+  - name: Single Python Script Plugin
+    cwd: ./plugins/single-python-script-plugin/
+    cmd: python main.py
+  - name: Python Project Plugin
+    cwd: ./plugins/python-project-plugin/
+    cmd: bash run.sh

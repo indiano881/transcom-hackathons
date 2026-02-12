@@ -6,7 +6,7 @@ ALLOWED_EXTENSIONS = {
     ".html", ".htm", ".css", ".js", ".json", ".txt", ".md",
     ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp",
     ".woff", ".woff2", ".ttf", ".eot", ".otf",
-    ".xml", ".webmanifest", ".map", ".pdf",
+    ".xml", ".webmanifest", ".map",
 }
 
 MAX_ZIP_SIZE = 50 * 1024 * 1024  # 50MB
@@ -34,11 +34,6 @@ def validate_and_extract(zip_path: Path, dest_dir: Path) -> dict:
             if info.is_dir():
                 continue
 
-            # Skip macOS metadata and hidden files
-            name = Path(info.filename).name
-            if info.filename.startswith("__MACOSX/") or name.startswith("."):
-                continue
-
             # Reject path traversal
             member_path = Path(info.filename)
             if ".." in member_path.parts:
@@ -63,9 +58,6 @@ def validate_and_extract(zip_path: Path, dest_dir: Path) -> dict:
         # Extract all files
         for info in zf.infolist():
             if info.is_dir():
-                continue
-            name = Path(info.filename).name
-            if info.filename.startswith("__MACOSX/") or name.startswith("."):
                 continue
             target = dest_dir / info.filename
             target.parent.mkdir(parents=True, exist_ok=True)
